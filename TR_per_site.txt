@@ -1,0 +1,8 @@
+ID	Site		TR
+1   	Amsterdam	1800
+2   	Leuven		1700
+3   	Albuquerque	2000
+4   	Nijmegen	1870		
+5   	Los Angeles	2000		
+6   	Cleveland	2800		
+7   	Glen Oaks	2000
