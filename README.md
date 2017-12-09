@@ -19,6 +19,7 @@ Usage:
 Input is expected to follow one of the following directory structures to find structural and functional data in NIFTI format:
 
 • {dataFolder}/{subjectID}/{T1_pattern}|{fMRI_pattern}.nii(.gz)
+
 • {dataFolder}/{subjectID}/{sessionID}/{T1_pattern}|{fMRI_pattern}.nii(.gz)
 
 
@@ -36,8 +37,13 @@ Or when directing to to specific session subdirectory
 Pipeline requirements:
 
 • FSL
+
 • ANTs
+
 • c3d
+
 • Customized ICA-AROMA toolbox (contains changes in ICA_AROMA_functions.py that allow for combining FSL's BBR coregistration with ANTs affine transformation files)
+
 • Python 2.7 (modules: os, argparse, commands, numpy, random)
+
 • Templates directory containing standard MNI tempates, OASIS templates (used for ANTs brain extraction), FEAT design file and Harvard-Oxford priors for CSF and WM 
