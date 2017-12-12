@@ -80,7 +80,7 @@ nuisance() {
 
 	# 9. Temporal filtering: sigma_hp = 1/2*f*TR = 1/2*0.01*TR = 100/2*TR = 100/2*1.6 = 31.25
 	f=0.01
-	sigma_hp=$(awk "BEGIN {print 1/(2*${TR}*${f})")
+	sigma_hp=$(awk "BEGIN {print 1/(2*${TR}*${f})}")
 
 	echo "High-pass filtering with sigma_hp=${sigma_hp} (>${f} Hz, TR=${TR})"
 	fslmaths ${AROMAFolder}/denoised_func_data_nonaggr_residual.nii.gz -bptf ${sigma_hp} -1 -add ${featFolder}/tempMean.nii.gz ${AROMAFolder}/denoised_func_data_nonaggr_residual_highpass.nii.gz
