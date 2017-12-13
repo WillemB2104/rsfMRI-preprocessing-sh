@@ -110,9 +110,9 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #-----ATTENTION----------------------------------------
-COPY ./rsfMRI-preprocessing-sh-master/*.sh /scripts/
-COPY ./rsfMRI-preprocessing-sh-master/ICA-AROMA /scripts/ICA-AROMA
-COPY ./rsfMRI-preprocessing-sh-master/Templates /scripts/Templates
+COPY ./*.sh /scripts/
+COPY ./ICA-AROMA /scripts/ICA-AROMA
+COPY ./Templates /scripts/Templates
 WORKDIR /scripts
 RUN sed -i '$isource /scripts/preprocessing_main.sh /input ECT_MRI_1 "" /output T1W fMRI' $ND_ENTRYPOINT
 #------------------------------------------------------
