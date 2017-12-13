@@ -27,7 +27,7 @@ RUN apt-get update -qq && apt-get install -yq --no-install-recommends  \
     && if [ ! -f "$ND_ENTRYPOINT" ]; then \
          echo '#!/usr/bin/env bash' >> $ND_ENTRYPOINT \
          && echo 'set +x' >> $ND_ENTRYPOINT \
-         && echo 'if [ -z "$*" ]; then /usr/bin/env bash; else $*; fi' >> $ND_ENTRYPOINT; \
+         && echo 'if [ -z "$*" ]; then /usr/bin/env bash; else echo "Done with: $*"; fi' >> $ND_ENTRYPOINT; \
        fi \
     && chmod -R 777 /neurodocker && chmod a+s /neurodocker
 ENTRYPOINT ["/neurodocker/startup.sh"]
@@ -114,7 +114,8 @@ COPY ./*.sh /scripts/
 COPY ./ICA-AROMA /scripts/ICA-AROMA
 COPY ./Templates /scripts/Templates
 WORKDIR /scripts
-RUN sed -i '$isource /scripts/preprocessing_main.sh /input ECT_MRI_1 "" /output T1W fMRI' $ND_ENTRYPOINT
+#RUN sed -i '$isource /scripts/preprocessing_main.sh /input ECT_MRI_1 "" /output T1W fMRI' $ND_ENTRYPOINT
+RUN sed -i '$iexport USER=root; if [ -z "$*" ]; then source /scripts/preprocessing_main.sh $*; else echo "Usage:  /input ECT_MRI_1 "" /output T1W fMRI"; fi;' $ND_ENTRYPOINT
 #------------------------------------------------------
 
 
