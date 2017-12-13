@@ -10,7 +10,7 @@ ANTsRegistration() {
 
     # 1. normalization (structural to MNI) in ANTs
     echo "ANTs normalization initiated!"
-    antsRegistrationSyN.sh -d 3 -f ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz -m ${structBrain} -o ${featFolder}/reg/ANTsT1toMNI -n 12 -j 1
+    antsRegistrationSyN.sh -d 3 -f ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz -m ${structBrain} -o ${featFolder}/reg/ANTsT1toMNI -n 1 -j 1
 
     # 2. transform BBR coregistration to ANTs
     echo "Transforming BBR coregistration"
