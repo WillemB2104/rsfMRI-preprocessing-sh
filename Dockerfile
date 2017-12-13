@@ -111,7 +111,9 @@ RUN apt-get update -qq \
 
 #-----ATTENTION----------------------------------------
 COPY ./*.sh /scripts/
-COPY ./ICA-AROMA /scripts/ICA-AROMA
+#COPY ./ICA-AROMA /scripts/ICA-AROMA
+COPY ./ICA-AROMA.zip /scripts/ICA-AROMA.zip
+RUN /usr/bin/unzip /scripts/ICA-AROMA.zip -d /scripts/
 COPY ./Templates /scripts/Templates
 WORKDIR /scripts
 #RUN sed -i '$isource /scripts/preprocessing_main.sh /input ECT_MRI_1 "" /output T1W fMRI' $ND_ENTRYPOINT
