@@ -96,7 +96,7 @@ RUN echo "Downloading Miniconda installer ..." \
 #-------------------------
 
 #-----ATTENTION----------------------------------------
-COPY ./rsfMRI-preprocessing-sh-master/requirements.txt .
+COPY ./requirements.txt .
 #------------------------------------------------------
 
 RUN conda create -y -q --name py27 python=2.7 --file requirements.txt \
