@@ -115,7 +115,7 @@ COPY ./ICA-AROMA /scripts/ICA-AROMA
 COPY ./Templates /scripts/Templates
 WORKDIR /scripts
 #RUN sed -i '$isource /scripts/preprocessing_main.sh /input ECT_MRI_1 "" /output T1W fMRI' $ND_ENTRYPOINT
-RUN sed -i '$iexport USER=root; if [ -z "$*" ]; then source /scripts/preprocessing_main.sh $*; else echo "Usage:  /input ECT_MRI_1 "" /output T1W fMRI"; fi;' $ND_ENTRYPOINT
+RUN sed -i '$iexport USER=root; if [ ! -z "$*" ]; then source /scripts/preprocessing_main.sh ${a[0]} ${a[1]} ${a[2]} ${a[3]} ${a[4]}; else echo "Usage:  /input ECT_MRI_1 "" /output T1W fMRI"; fi;' $ND_ENTRYPOINT
 #------------------------------------------------------
 
 
