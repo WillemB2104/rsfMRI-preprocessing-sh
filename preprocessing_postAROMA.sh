@@ -27,45 +27,39 @@ nuisance() {
 	imrm ${structuralBrain_no_ext}_seg.nii.gz
 	imrm ${structuralBrain_no_ext}_pveseg.nii.gz
 
-    echo "Thresholding masks"
-	fslmaths ${structuralBrain_no_ext}_pve_0.nii.gz -thr 0.99 -bin ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz
-	fslmaths ${structuralBrain_no_ext}_pve_1.nii.gz -thr 0.01 -bin ${nuisanceFolder}/gm_tmp.nii.gz
-	fslmaths ${structuralBrain_no_ext}_pve_2.nii.gz -thr 0.99 -bin ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz
+    # 2. Threshold masks
+	echo "Thresholding masks"
+	fslmaths ${structuralBrain_no_ext}_pve_0.nii.gz -thrp 99 -bin ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99.nii.gz
+	fslmaths ${structuralBrain_no_ext}_pve_2.nii.gz -thrp 99 -bin ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99.nii.gz
 
-	echo "Inverting gray matter masks"
-	fslmaths ${nuisanceFolder}/gm_tmp.nii.gz -sub 1 -abs ${nuisanceFolder}/gm_inv.nii.gz
-	fslmaths ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/gm_inv.nii.gz ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz
-	fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/gm_inv.nii.gz ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz
-
-	# erosion x3 WM, x1 CSF
+	# 2.1 Erode masks
 	echo "Eroding masks"
-	fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -eroF ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz
-	fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -eroF ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz
-	fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -eroF ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz
-	fslmaths ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -eroF ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz
+	fslmaths ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99.nii.gz -ero ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99_ero1.nii.gz
+	fslmaths ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99.nii.gz -ero ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99_ero1.nii.gz
 
-	# 3. Transform to fMRI space using NearestNeighbor interpolation
+	# 3. Transform to fMRI space using Multilabel interpolation ---> No more combining priors?
 	echo "Transform masks to fMRI space"
-	antsApplyTransforms -d 3 -i ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
-	antsApplyTransforms -d 3 -i ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
-	antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_csf_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
-	antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_wm_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
+	antsApplyTransforms -d 3 -i ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
+	antsApplyTransforms -d 3 -i ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
+	
+	# antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_csf_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
+	# antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_wm_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
 
     # combine Harvard Oxford prior masks with subject specific mask
-    echo "Combine prior masks with extracted masks"
-	fslmaths ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/csf_prior.nii.gz ${nuisanceFolder}/csf_mask_epi_final.nii.gz
-	fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/wm_prior.nii.gz ${nuisanceFolder}/wm_mask_epi_final.nii.gz
+    # echo "Combine prior masks with extracted masks"
+	# fslmaths ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/csf_prior.nii.gz ${nuisanceFolder}/csf_mask_epi_final.nii.gz
+	# fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/wm_prior.nii.gz ${nuisanceFolder}/wm_mask_epi_final.nii.gz
 
 	# 4. Extract mean CSF/WM time-series
 	echo "Calculate mean signal of WM/CSF"
-	fslmeants -i ${fMRIData} -o ${nuisanceFolder}/mean_csf_conservative.txt -m ${nuisanceFolder}/csf_mask_epi_final.nii.gz
-	fslmeants -i ${fMRIData} -o ${nuisanceFolder}/mean_wm_conservative.txt -m ${nuisanceFolder}/wm_mask_epi_final.nii.gz
+	fslmeants -i ${fMRIData} -o ${nuisanceFolder}/mean_csf.txt -m ${nuisanceFolder}/csf_mask_epi.nii.gz
+	fslmeants -i ${fMRIData} -o ${nuisanceFolder}/mean_wm.txt -m ${nuisanceFolder}/wm_mask_epi.nii.gz
 
 	# 5. Combine both nuisance files
 	echo "Combining files"	
-	paste ${nuisanceFolder}/mean_csf_conservative.txt ${nuisanceFolder}/mean_wm_conservative.txt > ${nuisanceFolder}/nuisance.txt
+	paste ${nuisanceFolder}/mean_csf.txt ${nuisanceFolder}/mean_wm.txt > ${nuisanceFolder}/nuisance.txt
 		
-	# 6. Calculating temporal mean (not sure whether it's correct to do it here)
+	# 6. Calculating temporal mean 
 	echo "Calculate Temporal Mean"
 	fslmaths ${fMRIData} -Tmean ${featFolder}/tempMean.nii.gz
 
@@ -87,7 +81,7 @@ nuisance() {
 
 	# 10. Registration to MNI at 4mm
 	echo "Register the preprocessed data to MNI at 4mm and mask using an 4mm MNI-mask"
-	antsApplyTransforms -d 3 -e 3 -i ${AROMAFolder}/denoised_func_data_nonaggr_residual_highpass.nii.gz -r ${MNI4mm} -n BSpline -t ${featFolder}/reg/ANTsT1toMNI1Warp.nii.gz -t ${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat -t ${featFolder}/reg/ANTsEPI2T1_BBR.txt -o ${AROMAFolder}/func_data_aroma_residual_final.nii.gz -v --float
+	antsApplyTransforms -d 3 -e 3 -i ${AROMAFolder}/denoised_func_data_nonaggr_residual_highpass.nii.gz -r ${MNI4mm} -n LanczosWindowedSinc -t ${featFolder}/reg/ANTsT1toMNI1Warp.nii.gz -t ${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat -t ${featFolder}/reg/ANTsEPI2T1_BBR.txt -o ${AROMAFolder}/func_data_aroma_residual_final.nii.gz -v --float
 	fslmaths ${AROMAFolder}/func_data_aroma_residual_final.nii.gz -mas ${MNIMask} ${AROMAFolder}/func_data_aroma_residual_final.nii.gz
 
     ### Save additional output for preprocessed files without nuisance regression ###
@@ -98,6 +92,6 @@ nuisance() {
 
 	# 12. Registration to MNI at 4mm
 	echo "Register the preprocessed data without nuisance regression to MNI at 4mm and mask using an 4mm MNI-mask"
-	antsApplyTransforms -d 3 -e 3 -i ${AROMAFolder}/denoised_func_data_nonaggr_highpass.nii.gz -r ${MNI4mm} -n BSpline -t ${featFolder}/reg/ANTsT1toMNI1Warp.nii.gz -t ${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat -t ${featFolder}/reg/ANTsEPI2T1_BBR.txt -o ${AROMAFolder}/func_data_aroma_final.nii.gz -v --float
+	antsApplyTransforms -d 3 -e 3 -i ${AROMAFolder}/denoised_func_data_nonaggr_highpass.nii.gz -r ${MNI4mm} -n LanczosWindowedSinc -t ${featFolder}/reg/ANTsT1toMNI1Warp.nii.gz -t ${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat -t ${featFolder}/reg/ANTsEPI2T1_BBR.txt -o ${AROMAFolder}/func_data_aroma_final.nii.gz -v --float
 	fslmaths ${AROMAFolder}/func_data_aroma_final.nii.gz -mas ${MNIMask} ${AROMAFolder}/func_data_aroma_final.nii.gz
 }

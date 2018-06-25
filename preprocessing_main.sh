@@ -9,10 +9,10 @@ run() {
         T1_pattern="$4"
         fMRI_pattern="$5"
 
-        echo "#1 Running FEAT pre-processing"
-        source ./preprocessing_FEAT.sh
-        preprocessing_FEAT "${dataFolder}" "${subj_sessFolder}" "${destFolder}" "${T1_pattern}" "${fMRI_pattern}"
-        echo -e "Finished FEAT preprocessing\n"
+        echo "#1 Running ANTS brain extraction and FEAT pre-processing"
+        source ./preprocessing_preAROMA.sh
+        preprocessing_preAROMA "${dataFolder}" "${subj_sessFolder}" "${destFolder}" "${T1_pattern}" "${fMRI_pattern}"
+        echo -e "Finished ANTS brain extraction and FEAT preprocessing\n"
 
         echo "#2 Performing ANTsRegistration"
         source ./preprocessing_ANTsRegistration.sh

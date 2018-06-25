@@ -1,6 +1,6 @@
 #!/bin/bash
 
-preprocessing_FEAT() {
+preprocessing_preAROMA() {
     dataFolder="$1"
     subj_sessFolder="$2"
     destFolder="$3"
