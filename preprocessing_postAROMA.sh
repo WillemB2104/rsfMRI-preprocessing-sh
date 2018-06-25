@@ -29,23 +29,24 @@ nuisance() {
 
     # 2. Threshold masks
 	echo "Thresholding masks"
-	fslmaths ${structuralBrain_no_ext}_pve_0.nii.gz -thrp 99 -bin ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99.nii.gz
-	fslmaths ${structuralBrain_no_ext}_pve_2.nii.gz -thrp 99 -bin ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99.nii.gz
+	fslmaths ${structuralBrain_no_ext}_pve_0.nii.gz -thrp 99 -bin ${nuisanceFolder}/CSF_thrp99.nii.gz
+	fslmaths ${structuralBrain_no_ext}_pve_2.nii.gz -thrp 99 -bin ${nuisanceFolder}/WM_thrp99.nii.gz
 
 	# 2.1 Erode masks
 	echo "Eroding masks"
-	fslmaths ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99.nii.gz -ero ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99_ero1.nii.gz
-	fslmaths ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99.nii.gz -ero ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99_ero1.nii.gz
+	fslmaths ${nuisanceFolder}/CSF_thrp99.nii.gz -ero ${nuisanceFolder}/CSF_thrp99_ero1.nii.gz
+	fslmaths ${nuisanceFolder}/CSF_thrp99.nii.gz -ero ${nuisanceFolder}/WM_thrp99_ero1.nii.gz
 
 	# 3. Transform to fMRI space using Multilabel interpolation ---> No more combining priors?
 	echo "Transform masks to fMRI space"
-	antsApplyTransforms -d 3 -i ${nuisanceFolder}/${structuralBrain_no_ext}_CSF_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
-	antsApplyTransforms -d 3 -i ${nuisanceFolder}/${structuralBrain_no_ext}_WM_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
-	
+	antsApplyTransforms -d 3 -i ${nuisanceFolder}/CSF_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
+	antsApplyTransforms -d 3 -i ${nuisanceFolder}/WM_thrp99_ero1.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_mask_epi.nii.gz -n MultiLabel -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -v --float
+
+	## Transform prior masks
 	# antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_csf_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/csf_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
 	# antsApplyTransforms -d 3 -i ${TemplateFolder}/ho_wm_prior.nii.gz -r ${exampleFunc} -o ${nuisanceFolder}/wm_prior.nii.gz -n NearestNeighbor -t [${featFolder}/reg/ANTsEPI2T1_BBR.txt,1] -t [${featFolder}/reg/ANTsT1toMNI0GenericAffine.mat,1] -t ${featFolder}/reg/ANTsT1toMNI1InverseWarp.nii.gz -v --float
 
-    # combine Harvard Oxford prior masks with subject specific mask
+    ## Combine Harvard Oxford prior masks with subject specific mask
     # echo "Combine prior masks with extracted masks"
 	# fslmaths ${nuisanceFolder}/csf_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/csf_prior.nii.gz ${nuisanceFolder}/csf_mask_epi_final.nii.gz
 	# fslmaths ${nuisanceFolder}/wm_mask_epi_conservative.nii.gz -mul ${nuisanceFolder}/wm_prior.nii.gz ${nuisanceFolder}/wm_mask_epi_final.nii.gz
